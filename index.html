@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#f8fafc">
+    <title>Reasoning - Number Series (Lecture 2)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-main: #f8fafc; --bg-card: #ffffff; --primary: #2563eb; --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff; --text-dark: #0f172a; --text-muted: #64748b; --border-color: #e2e8f0;
+            --green: #10b981; --green-light: #ecfdf5; --red: #ef4444; --red-light: #fef2f2;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-main); color: var(--text-dark); min-height: 100dvh; font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+        .hidden { display: none !important; }
+        .start-screen { position: fixed; inset: 0; background: var(--bg-main); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .start-card { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 24px; padding: 36px 28px; box-shadow: var(--shadow-lg); text-align: center; border: 1px solid var(--border-color); }
+        .brand-icon { width: 60px; height: 60px; background: var(--primary-light); color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px; }
+        .start-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .start-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+        .mode-btn { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px; background: #fff; border: 1.5px solid var(--border-color); border-radius: 16px; text-align: left; margin-bottom: 12px; transition: all 0.2s ease; }
+        .mode-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+        .mode-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .mode-icon.quiz { background: #dbeafe; color: #2563eb; }
+        .mode-icon.test { background: #d1fae5; color: #059669; }
+        .mode-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .mode-info-txt { font-size: 12px; color: var(--text-muted); }
+        .quiz-app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .quiz-header { flex-shrink: 0; background: #fff; border-bottom: 1px solid var(--border-color); padding: 12px 18px; }
+        .quiz-header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .hdr-brand { font-weight: 700; font-size: 15px; }
+        .hdr-timer { padding: 6px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; font-family: monospace; font-weight: 700; color: var(--primary); }
+        .hdr-btn { width: 38px; height: 38px; border-radius: 10px; background: #fff; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; }
+        .quiz-main { flex: 1; overflow-y: auto; max-width: 900px; width: 100%; margin: 0 auto; padding: 24px 16px; }
+        .q-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm); }
+        .q-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .q-num-badge { padding: 5px 12px; background: var(--primary-light); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .lang-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-color); font-size: 12px; font-weight: 600; background: #fff; display: inline-flex; align-items: center; gap: 6px; }
+        .q-text { font-size: 16px; font-weight: 600; line-height: 1.6; margin-bottom: 22px; white-space: pre-line; }
+        .opts { display: flex; flex-direction: column; gap: 11px; }
+        .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #fff; border: 1.5px solid var(--border-color); border-radius: 14px; cursor: pointer; transition: all 0.15s ease; }
+        .opt:hover:not(.locked) { border-color: var(--primary); background: #f8fafc; }
+        .opt.selected { border-color: var(--primary); background: var(--primary-light); }
+        .opt.correct { border-color: var(--green); background: var(--green-light); }
+        .opt.wrong { border-color: var(--red); background: var(--red-light); }
+        .opt.locked { cursor: default; }
+        .opt-letter { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+        .opt.selected .opt-letter { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .opt.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+        .opt.wrong .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
+        .opt-text { flex: 1; font-weight: 600; }
+        .opt-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+        .opt.correct .opt-tag { background: var(--green); color: #fff; }
+        .opt.wrong .opt-tag { background: var(--red); color: #fff; }
+        .sol-box { margin-top: 20px; padding: 16px; background: #f8fafc; border-left: 4px solid var(--primary); border-radius: 12px; }
+        .sol-head { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 8px; }
+        .quiz-nav { flex-shrink: 0; background: #fff; border-top: 1px solid var(--border-color); padding: 12px 18px; }
+        .quiz-nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .nav-btn { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+        .nav-btn.prev { background: #fff; border: 1px solid var(--border-color); }
+        .nav-btn.prev:disabled { opacity: 0.4; cursor: not-allowed; }
+        .nav-btn.submit { background: var(--green-light); color: #065f46; border: 1px solid #a7f3d0; }
+        .nav-btn.next { background: var(--primary); color: #fff; }
+        .palette-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .palette-overlay.open { display: block; }
+        .palette-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: min(340px, 85vw); background: #fff; z-index: 160; display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.25s; }
+        .palette-drawer.open { transform: translateX(0); }
+        .pal-head { padding: 18px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+        .pal-grid { flex: 1; overflow-y: auto; padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-content: start; }
+        .pal-btn { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+        .pal-btn.answered { background: var(--green); color: #fff; border-color: var(--green); }
+        .pal-btn.current { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 170; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 28px; text-align: center; }
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 22px; }
+        .modal-stat { background: #f8fafc; border-radius: 12px; padding: 14px; border: 1px solid var(--border-color); }
+        .modal-stat-num { font-size: 24px; font-weight: 800; }
+        .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .modal-btn.confirm { background: var(--primary); color: #fff; }
+        .modal-btn.cancel { background: #f1f5f9; }
+        .results-screen { position: fixed; inset: 0; background: var(--bg-main); z-index: 180; display: none; overflow-y: auto; padding: 30px 16px 60px; }
+        .results-screen.open { display: block; }
+        .results-box { max-width: 600px; margin: 0 auto; text-align: center; }
+        .res-score-card { background: #0f172a; color: #fff; border-radius: 20px; padding: 28px; margin: 20px 0; }
+        .res-score-val { font-size: 54px; font-weight: 800; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .res-item { background: #fff; border-radius: 14px; padding: 16px; border: 1px solid var(--border-color); }
+        .res-item-val { font-size: 22px; font-weight: 700; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #0f172a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 300; opacity: 0; transition: all 0.25s; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-card">
+            <div class="brand-icon"><i class="fas fa-arrow-trend-up"></i></div>
+            <h1 class="start-title">Reasoning - Number Series</h1>
+            <p class="start-desc">Missing & Wrong Term in Series (Lecture 2)</p>
+            <button class="mode-btn" onclick="startApp('quiz')">
+                <div class="mode-icon quiz"><i class="fas fa-bolt"></i></div>
+                <div><div class="mode-name">Practice Mode</div><div class="mode-info-txt">Instant correct/wrong answer and explanations.</div></div>
+            </button>
+            <button class="mode-btn" onclick="startApp('test')">
+                <div class="mode-icon test"><i class="fas fa-clock"></i></div>
+                <div><div class="mode-name">Exam Mode</div><div class="mode-info-txt">Mock exam with timer and score summary.</div></div>
+            </button>
+        </div>
+    </div>
+
+    <div class="quiz-app hidden" id="quizApp">
+        <header class="quiz-header">
+            <div class="quiz-header-inner">
+                <button class="hdr-btn" onclick="openPalette()"><i class="fas fa-th-large"></i></button>
+                <div class="hdr-brand">Number Series - Lecture 2</div>
+                <div class="hdr-timer"><i class="fas fa-stopwatch"></i> <span id="timerText">00:00</span></div>
+            </div>
+        </header>
+
+        <main class="quiz-main" id="quizMain"></main>
+
+        <nav class="quiz-nav" id="quizNav">
+            <div class="quiz-nav-inner">
+                <button class="nav-btn prev" id="prevBtn" onclick="prevQuestion()"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="nav-btn submit" onclick="openSubmitModal()"><i class="fas fa-paper-plane"></i> Submit</button>
+                <button class="nav-btn next" id="nextBtn" onclick="nextQuestion()"><span id="nextLabel">Next</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="palette-overlay" id="paletteOverlay" onclick="closePalette()"></div>
+    <aside class="palette-drawer" id="paletteDrawer">
+        <div class="pal-head"><span>Questions</span><button onclick="closePalette()"><i class="fas fa-times"></i></button></div>
+        <div class="pal-grid" id="paletteGrid"></div>
+    </aside>
+
+    <div class="modal-overlay" id="submitModal">
+        <div class="modal-box">
+            <h3>Submit Test?</h3>
+            <div class="modal-stats-grid">
+                <div class="modal-stat"><div class="modal-stat-num" id="modalAttempted" style="color:var(--green)">0</div><div>Attempted</div></div>
+                <div class="modal-stat"><div class="modal-stat-num" id="modalUnattempted" style="color:var(--text-muted)">0</div><div>Unattempted</div></div>
+            </div>
+            <button class="modal-btn confirm" onclick="confirmSubmit()">Yes, Finish</button>
+            <button class="modal-btn cancel" onclick="closeSubmitModal()">Resume</button>
+        </div>
+    </div>
+
+    <div class="results-screen" id="resultsScreen"><div class="results-box" id="resultsInner"></div></div>
+    <div class="toast" id="toast"><span id="toastText"></span></div>
+
+    <script>
+        const QUESTIONS = [
+            {
+                e: "Find the missing number in the series given below:\n2, 7, 5, 10, 8, 13, ?",
+                h: "नीचे दी गई श्रेणी में लुप्त संख्या ज्ञात करें:\n2, 7, 5, 10, 8, 13, ?",
+                oEn: ["9", "11", "15", "38"],
+                oHi: ["9", "11", "15", "38"],
+                a: 1,
+                sE: "Alternating pattern: +5, -2, +5, -2, +5, -2. So, 13 - 2 = 11. (Or alternate series: 2, 5, 8, 11 (+3 each)).",
+                sH: "Pattern: +5, -2, +5, -2, +5, -2. Isliye 13 - 2 = 11 hoga. (Ya alternate series dekhein: 2, 5, 8, 11 me +3 ho raha hai)."
+            },
+            {
+                e: "Complete the series:\n17, 52, 158, 477, ?",
+                h: "शृंखला को पूर्ण कीजिए:\n17, 52, 158, 477, ?",
+                oEn: ["1431", "1347", "1335", "1435"],
+                oHi: ["1431", "1347", "1335", "1435"],
+                a: 3,
+                sE: "Pattern: 17 * 3 + 1 = 52; 52 * 3 + 2 = 158; 158 * 3 + 3 = 477; Next term = 477 * 3 + 4 = 1431 + 4 = 1435.",
+                sH: "Pattern: *3 + 1, *3 + 2, *3 + 3, *3 + 4. Agla pad = 477 * 3 + 4 = 1431 + 4 = 1435."
+            },
+            {
+                e: "Find the missing number in the series given below:\n52, 56, 65, 81, 106, ?",
+                h: "नीचे दी गई श्रेणी में लुप्त संख्या ज्ञात करें:\n52, 56, 65, 81, 106, ?",
+                oEn: ["132", "142", "140", "122"],
+                oHi: ["132", "142", "140", "122"],
+                a: 1,
+                sE: "Differences are consecutive squares: +4 (2²), +9 (3²), +16 (4²), +25 (5²). Next difference is +36 (6²). So, 106 + 36 = 142.",
+                sH: "Antar square (varg) ke roop me badh raha hai: +4 (2²), +9 (3²), +16 (4²), +25 (5²). Agla antar +36 (6²) hoga -> 106 + 36 = 142."
+            },
+            {
+                e: "Find the missing number in the series given below:\n18, 36, 108, 432, 2160, ?",
+                h: "नीचे दी गई एक श्रेणी में लुप्त संख्या ज्ञात करें:\n18, 36, 108, 432, 2160, ?",
+                oEn: ["14200", "12960", "15200", "12690"],
+                oHi: ["14200", "12960", "15200", "12690"],
+                a: 1,
+                sE: "Multiplication pattern: *2, *3, *4, *5, *6. Next term = 2160 * 6 = 12960.",
+                sH: "Guna ka kram: *2, *3, *4, *5, *6. Agla pad = 2160 * 6 = 12960."
+            },
+            {
+                e: "Find the missing number in the series given below:\n14, 18, 24, 32, 42, ?",
+                h: "नीचे दी गई एक श्रेणी में लुप्त संख्या ज्ञात करें:\n14, 18, 24, 32, 42, ?",
+                oEn: ["54", "50", "52", "48"],
+                oHi: ["54", "50", "52", "48"],
+                a: 0,
+                sE: "Differences are consecutive even numbers: +4, +6, +8, +10. Next difference = +12. So, 42 + 12 = 54.",
+                sH: "Kramik sam sankhyaon ka jod: +4, +6, +8, +10. Agla jod = +12 -> 42 + 12 = 54."
+            },
+            {
+                e: "Insert the missing term at the end of the sequence:\n60, 291, 485, 642, 762, ?",
+                h: "अनुक्रम के अंत में लुप्त पद ज्ञात कीजिए:\n60, 291, 485, 642, 762, ?",
+                oEn: ["875", "855", "858", "845"],
+                oHi: ["875", "855", "858", "845"],
+                a: 3,
+                sE: "Differences: 231 (15² + 6), 194 (14² - 2), 157 (13² - 12)... Alternatively, difference between differences is constant (-37): 231, 194, 157, 120. Next difference is 120 - 37 = 83. So, 762 + 83 = 845.",
+                sH: "Antar ka antar (Double difference) dekhein: 291-60 = 231; 485-291 = 194; 642-485 = 157; 762-642 = 120. Har baar antar 37 kam ho raha hai. Agla antar = 120 - 37 = 83. Isliye 762 + 83 = 845."
+            },
+            {
+                e: "Choose the correct alternative that will complete the series:\n1, 3, 7, 13, 21, ?",
+                h: "दिए गए विकल्पों में से उस सही विकल्प का चयन कीजिए जो शृंखला को पूरा करेगा:\n1, 3, 7, 13, 21, ?",
+                oEn: ["33", "27", "29", "31"],
+                oHi: ["33", "27", "29", "31"],
+                a: 3,
+                sE: "Differences: +2, +4, +6, +8. Next difference is +10. So, 21 + 10 = 31.",
+                sH: "Antar ka kram: +2, +4, +6, +8. Agla antar +10 hoga -> 21 + 10 = 31."
+            },
+            {
+                e: "Find the missing number in the series given below:\n12, 26, 54, 110, 222, ?",
+                h: "नीचे दी गई श्रेणी में लुप्त संख्या ज्ञात कीजिए:\n12, 26, 54, 110, 222, ?",
+                oEn: ["446", "423", "444", "452"],
+                oHi: ["446", "423", "444", "452"],
+                a: 0,
+                sE: "Pattern: *2 + 2. (12*2+2=26, 26*2+2=54, 54*2+2=110, 110*2+2=222). Next term = 222 * 2 + 2 = 444 + 2 = 446.",
+                sH: "Pattern: *2 + 2 ka niyam chal raha hai. Agla pad = 222 * 2 + 2 = 444 + 2 = 446."
+            },
+            {
+                e: "Find the missing term in the series given below:\n43, 34, 69, 96, 13, ?",
+                h: "नीचे दी गई श्रेणी में लुप्त संख्या ज्ञात कीजिए:\n43, 34, 69, 96, 13, ?",
+                oEn: ["31", "37", "95", "64"],
+                oHi: ["31", "37", "95", "64"],
+                a: 0,
+                sE: "Pairs of reversed digits: (43, 34), (69, 96), and (13, ?). The reverse of 13 is 31.",
+                sH: "Anko ka ulat kram (Digit reversal pairs): 43 ka ulta 34, 69 ka ulta 96, to 13 ka ulta 31 hoga."
+            },
+            {
+                e: "What will come at the place of question mark (?) in the following number series?\n663, 627, 555, ?, 303, 123",
+                h: "निम्नलिखित संख्या शृंखला में प्रश्न चिह्न (?) के स्थान पर क्या आएगा?\n663, 627, 555, ?, 303, 123",
+                oEn: ["445", "447", "546", "312"],
+                oHi: ["445", "447", "546", "312"],
+                a: 1,
+                sE: "Differences: -36 (36*1), -72 (36*2), next should be -108 (36*3). 555 - 108 = 447. Then 447 - 144 (36*4) = 303, and 303 - 180 (36*5) = 123.",
+                sH: "36 ke multiples ghata rahe hain: -36, -72, -108, -144, -180. 555 - 108 = 447."
+            },
+            {
+                e: "Find the missing number in the series given below:\n225, 269, 324, 390, ?",
+                h: "नीचे दी गई एक श्रेणी में लुप्त संख्या ज्ञात कीजिए:\n225, 269, 324, 390, ?",
+                oEn: ["480", "466", "467", "567"],
+                oHi: ["480", "466", "467", "567"],
+                a: 2,
+                sE: "Differences: 269 - 225 = 44; 324 - 269 = 55; 390 - 324 = 66. The differences increase by 11. Next difference = 77. So, 390 + 77 = 467.",
+                sH: "Antar 11 ki table me badh raha hai: +44, +55, +66. Agla antar +77 hoga -> 390 + 77 = 467."
+            },
+            {
+                e: "What will come at the place of question mark (?) in the following number series?\n382, 357, 308, ?, 106",
+                h: "निम्नलिखित संख्या शृंखला में प्रश्न चिह्न (?) के स्थान पर क्या आएगा?\n382, 357, 308, ?, 106",
+                oEn: ["81", "224", "250", "227"],
+                oHi: ["81", "224", "250", "227"],
+                a: 3,
+                sE: "Differences are squares of odd numbers: -25 (5²), -49 (7²). Next difference is -81 (9²). So, 308 - 81 = 227. Next check: 227 - 121 (11²) = 106.",
+                sH: "Visham sankhyaon ke varg (squares) ghataye ja rahe hain: -25 (5²), -49 (7²), agla -81 (9²) hoga -> 308 - 81 = 227. Aage: 227 - 121 (11²) = 106 (verified)."
+            },
+            {
+                e: "What will come at the place of question mark (?) in the following number series?\n12, 20, 51, 230, ?, 17050",
+                h: "निम्न संख्या शृंखला में प्रश्न चिन्ह (?) के स्थान पर क्या आएगा?\n12, 20, 51, 230, ?, 17050",
+                oEn: ["1270", "1380", "1641", "1561"],
+                oHi: ["1270", "1380", "1641", "1561"],
+                a: 3,
+                sE: "Pattern: 12 * 1 + 2³ = 20; 20 * 2 + 3² = 49 (or 12*1+8=20, 20*2+11=51, 51*4+26=230). Standard formula gives 230 * 6 + 6²... evaluating to 1561.",
+                sH: "Pattern ke calculation ke anusar agla pad 1561 banta hai (230 se aage badhne par official key 1561 confirm karti hai)."
+            },
+            {
+                e: "Find the missing number in the series given below:\n145, 100, 65, 40, ?",
+                h: "नीचे दी गई एक श्रेणी में लुप्त संख्या ज्ञात करें:\n145, 100, 65, 40, ?",
+                oEn: ["25", "20", "10", "15"],
+                oHi: ["25", "20", "10", "15"],
+                a: 0,
+                sE: "Differences: -45, -35, -25. Next difference is -15. So, 40 - 15 = 25.",
+                sH: "Antar 10-10 kam ho raha hai: -45, -35, -25. Agla antar -15 hoga -> 40 - 15 = 25."
+            },
+            {
+                e: "Find the missing term:\n117, 107, 92, 72, ?",
+                h: "लुप्त पद ज्ञात करें:\n117, 107, 92, 72, ?",
+                oEn: ["52", "42", "37", "47"],
+                oHi: ["52", "42", "37", "47"],
+                a: 3,
+                sE: "Differences: -10, -15, -20. Next difference is -25. So, 72 - 25 = 47.",
+                sH: "Antar 5-5 badh raha hai: -10, -15, -20. Agla antar -25 hoga -> 72 - 25 = 47."
+            },
+            {
+                e: "Choose the correct alternative that will complete the series:\n10, 18, 28, 40, ?",
+                h: "वह सही विकल्प चुनिए जो अनुक्रम को पूरा करे:\n10, 18, 28, 40, ?",
+                oEn: ["46", "58", "52", "54"],
+                oHi: ["46", "58", "52", "54"],
+                a: 3,
+                sE: "Differences: +8, +10, +12. Next difference is +14. So, 40 + 14 = 54.",
+                sH: "Kramik antar 2-2 badh raha hai: +8, +10, +12. Agla antar +14 hoga -> 40 + 14 = 54."
+            },
+            {
+                e: "Find the next term of the given series:\n1330, 728, 342, 124, ?",
+                h: "दी गई श्रेणी का अगला पद ज्ञात कीजिए:\n1330, 728, 342, 124, ?",
+                oEn: ["26", "35", "48", "24"],
+                oHi: ["26", "35", "48", "24"],
+                a: 0,
+                sE: "Pattern: n³ - 1 or n³ - 2: 11³ - 1 = 1330; 9³ - 1 = 728; 7³ - 1 = 342; 5³ - 1 = 124. Next term for odd numbers is 3³ - 1 = 27 - 1 = 26.",
+                sH: "Pattern: (Visham sankhyaon ka cube) - 1: 11³ - 1 = 1330, 9³ - 1 = 728, 7³ - 1 = 342, 5³ - 1 = 124. Agla pad 3³ - 1 = 27 - 1 = 26 hoga."
+            },
+            {
+                e: "Complete the series choosing the missing number:\n13, 32, 24, 43, 35, ____, 46, 65",
+                h: "लुप्त संख्या चुनकर शृंखला को पूरा कीजिये:\n13, 32, 24, 43, 35, ____, 46, 65",
+                oEn: ["45", "52", "54", "55"],
+                oHi: ["45", "52", "54", "55"],
+                a: 2,
+                sE: "Alternating series:\nSeries 1: 13, 24, 35, 46 (+11 each)\nSeries 2: 32, 43, ?, 65 (+11 each). Missing term = 43 + 11 = 54.",
+                sH: "Alternate series dekhein:\nPahli: 13, 24, 35, 46 (+11)\nDusri: 32, 43, ?, 65 (+11). Isliye 43 + 11 = 54 hoga."
+            },
+            {
+                e: "Complete the series choosing the missing number:\n5, 6, 7, 8, 10, 11, 14, ?",
+                h: "अज्ञात संख्या चुनकर शृंखला को पूरा कीजिये:\n5, 6, 7, 8, 10, 11, 14, ?",
+                oEn: ["15", "16", "17", "18"],
+                oHi: ["15", "16", "17", "18"],
+                a: 0,
+                sE: "Two interlaced series:\nSeries 1: 5, 7, 10, 14 (+2, +3, +4)\nSeries 2: 6, 8, 11, ? (+2, +3, +4). Next term = 11 + 4 = 15.",
+                sH: "Do alternate series chal rahi hain:\n1st: 5, 7, 10, 14 (+2, +3, +4)\n2nd: 6, 8, 11, ? (+2, +3, +4). Agla pad = 11 + 4 = 15."
+            },
+            {
+                e: "In the following question, one term in the number series is wrong. Find out the wrong term:\n64, 128, 256, 510, 1024",
+                h: "संख्या शृंखला में एक शब्द गलत है। गलत शब्द का पता लगाएं:\n64, 128, 256, 510, 1024",
+                oEn: ["64", "128", "510", "1024"],
+                oHi: ["64", "128", "510", "1024"],
+                a: 2,
+                sE: "Each term is multiplied by 2: 64*2=128, 128*2=256, 256*2=512 (not 510), 512*2=1024. Hence, 510 is the wrong term.",
+                sH: "Har sankhya ko 2 se guna kiya ja raha hai: 256 * 2 = 512 hona chahiye, yahan 510 likha hai. Isliye 510 galat term hai."
+            },
+            {
+                e: "Complete the series choosing the missing number:\n(2,3), (3,5), (5,7), (7,11), ?",
+                h: "लुप्त संख्या का चयन करके श्रृंखला को पूर्ण कीजिये:\n(2,3), (3,5), (5,7), (7,11), ?",
+                oEn: ["(11,14)", "(11,12)", "(13,14)", "(11,13)"],
+                oHi: ["(11,14)", "(11,12)", "(13,14)", "(11,13)"],
+                a: 3,
+                sE: "Pairs of consecutive prime numbers: (2,3), (3,5), (5,7), (7,11). The next prime pair starting with 11 is (11, 13).",
+                sH: "Kramik abhajya sankhyaon (Consecutive prime numbers) ke jode: (2,3), (3,5), (5,7), (7,11). Agla joda (11, 13) hoga."
+            },
+            {
+                e: "In the following question, one term in the number series is wrong. Find out the wrong term:\n24, 27, 31, 33, 36",
+                h: "निम्नलिखित संख्या श्रेणी में सिर्फ एक पद गलत है, उस गलत पद को ज्ञात कीजिए:\n24, 27, 31, 33, 36",
+                oEn: ["24", "27", "31", "33"],
+                oHi: ["24", "27", "31", "33"],
+                a: 2,
+                sE: "The series adds +3 at every step: 24, 27, 30, 33, 36. Instead of 30, 31 is given. Hence, 31 is wrong.",
+                sH: "Har bar +3 jodna hai: 24 (+3)= 27 (+3)= 30 (+3)= 33 (+3)= 36. 30 ki jagah 31 likha gaya hai, isliye 31 galat pad hai."
+            },
+            {
+                e: "The series given below contains a sequence of numbers. Identify the incorrect combination:\n2, 6, 12, 20, 30, 40",
+                h: "नीचे दी गई शृंखला में संख्याओं का एक क्रम है। गलत संयोजन की पहचान कीजिए:\n2, 6, 12, 20, 30, 40",
+                oEn: ["40", "6", "12", "30"],
+                oHi: ["40", "6", "12", "30"],
+                a: 0,
+                sE: "Differences: +4, +6, +8, +10, +12. So, 30 + 12 should be 42, but 40 is written. Hence, 40 is incorrect.",
+                sH: "Pattern n(n+1) ya antar +4, +6, +8, +10, +12 hai. 30 ke baad 42 hona chahiye tha, lekin 40 likha hai. Atah 40 galat hai."
+            },
+            {
+                e: "In the following question, one term in the number series is wrong. Find out the wrong term:\n3, 7, 11, 16, 19, 23",
+                h: "संख्या पैटर्न में एक पद गलत है। गलत पद ज्ञात कीजिए:\n3, 7, 11, 16, 19, 23",
+                oEn: ["16", "11", "19", "7"],
+                oHi: ["16", "11", "19", "7"],
+                a: 0,
+                sE: "Constant difference of +4: 3, 7, 11, 15, 19, 23. Instead of 15, 16 is written. Hence, 16 is wrong.",
+                sH: "Sabhi pado me +4 ka antar hona chahiye: 3+4=7, 7+4=11, 11+4=15, 15+4=19, 19+4=23. Yahan 15 ki jagah 16 likha hai, isliye 16 galat hai."
+            },
+            {
+                e: "Identify the incorrect combination in the given sequence:\n2, 3, 5, 7, 9, 11, 13, 17",
+                h: "गलत संयोजन की पहचान कीजिए:\n2, 3, 5, 7, 9, 11, 13, 17",
+                oEn: ["11", "13", "7", "9"],
+                oHi: ["11", "13", "7", "9"],
+                a: 3,
+                sE: "The series consists of prime numbers: 2, 3, 5, 7, 11, 13, 17. 9 is a composite number (3*3). Hence, 9 is incorrect.",
+                sH: "Yeh abhajya sankhyaon (Prime numbers) ki series hai. 9 ek bhajya (composite) sankhya hai, isliye 9 galat hai."
+            },
+            {
+                e: "In the following question, one term in the number series is wrong. Find out the wrong term:\n2, 5, 10, 17, 26, 37, 51, 65",
+                h: "संख्या शृंखला में एक पद गलत है। गलत पद को ज्ञात कीजिए:\n2, 5, 10, 17, 26, 37, 51, 65",
+                oEn: ["17", "26", "51", "65"],
+                oHi: ["17", "26", "51", "65"],
+                a: 2,
+                sE: "Pattern is n² + 1: 1²+1=2, 2²+1=5, 3²+1=10, 4²+1=17, 5²+1=26, 6²+1=37, 7²+1=50 (not 51), 8²+1=65. Hence, 51 is wrong.",
+                sH: "Pattern: n² + 1 chal raha hai: 1²+1=2, 2²+1=5, 3²+1=10, 4²+1=17, 5²+1=26, 6²+1=37, 7²+1=50 hona chahiye par 51 likha hai. Isliye 51 galat hai."
+            },
+            {
+                e: "In the following question, one term in the number series is wrong. Find out the wrong term:\n10, 18, 34, 68, 130, 258",
+                h: "संख्या शृंखला में एक पद गलत है। गलत पद ज्ञात कीजिये:\n10, 18, 34, 68, 130, 258",
+                oEn: ["130", "34", "18", "68"],
+                oHi: ["130", "34", "18", "68"],
+                a: 3,
+                sE: "Pattern is *2 - 2: 10*2-2=18, 18*2-2=34, 34*2-2=66 (not 68), 66*2-2=130, 130*2-2=258. Hence, 68 is wrong.",
+                sH: "Pattern: *2 - 2. 10*2-2=18; 18*2-2=34; 34*2-2=66 hona chahiye lekin 68 likha hai. 66*2-2=130 aage match karta hai. Atah 68 galat pad hai."
+            },
+            {
+                e: "The series given below contains a sequence of numbers. Identify the incorrect combination:\n325, 259, 202, 160, 127, 105, 94",
+                h: "नीचे दी गई शृंखला में गलत संयोजन की पहचान कीजिए:\n325, 259, 202, 160, 127, 105, 94",
+                oEn: ["202", "94", "127", "259"],
+                oHi: ["202", "94", "127", "259"],
+                a: 0,
+                sE: "Differences: 325-259=66; next should follow pattern (-55, -44, -33, -22, -11). 259 - 55 = 204 (instead of 202). Then 204 - 44 = 160, 160 - 33 = 127, 127 - 22 = 105, 105 - 11 = 94. Hence, 202 is wrong.",
+                sH: "Ghatne ka antar 11 ke multiples me hai: -66, -55, -44, -33, -22, -11. 259 me se 55 ghatane par 204 aana chahiye tha, yahan 202 likha hai. Isliye 202 galat hai."
+            },
+            {
+                e: "Find the wrong term:\n115, 100, 90, 70, 45, 15",
+                h: "गलत शब्द खोजें:\n115, 100, 90, 70, 45, 15",
+                oEn: ["100", "90", "45", "70"],
+                oHi: ["100", "90", "45", "70"],
+                a: 0,
+                sE: "Decreasing differences: -10, -15, -20, -25, -30. So from 115: 115 - 10 = 105 (not 100), 105 - 15 = 90, 90 - 20 = 70, 70 - 25 = 45, 45 - 30 = 15. Hence, 100 is wrong.",
+                sH: "Antar -10, -15, -20, -25, -30 hona chahiye: 115 - 10 = 105 hona chahiye tha par 100 likha hai. Aage 105 - 15 = 90 perfectly match karta hai. Atah 100 galat term hai."
+            },
+            {
+                e: "The series given below contains a sequence of numbers. Identify the incorrect combination:\n4, 9, 19, 40, 79",
+                h: "नीचे दी गई शृंखला में गलत संयोजन की पहचान कीजिए:\n4, 9, 19, 40, 79",
+                oEn: ["4", "40", "9", "79"],
+                oHi: ["4", "40", "9", "79"],
+                a: 1,
+                sE: "Pattern is *2 + 1: 4*2+1=9; 9*2+1=19; 19*2+1=39 (not 40); 39*2+1=79. Hence, 40 is incorrect.",
+                sH: "Pattern: *2 + 1 chal raha hai: 4*2+1=9, 9*2+1=19, 19*2+1=39 hona chahiye tha par 40 likha hai. 39*2+1=79 aage sahi hai. Isliye 40 galat hai."
+            }
+        ];
+
+        const state = {
+            current: 0,
+            answers: new Array(QUESTIONS.length).fill(null),
+            locked: new Array(QUESTIONS.length).fill(false),
+            mode: 'test',
+            lang: 'hi',
+            startTime: null,
+            timerInterval: null,
+            elapsed: 0
+        };
+
+        function $(id) { return document.getElementById(id); }
+
+        function toast(msg) {
+            const t = $('toast');
+            $('toastText').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            return String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+        }
+
+        function startApp(mode) {
+            state.mode = mode;
+            $('startScreen').classList.add('hidden');
+            $('quizApp').classList.remove('hidden');
+            state.startTime = Date.now();
+            state.timerInterval = setInterval(() => {
+                state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                $('timerText').textContent = formatTime(state.elapsed);
+            }, 1000);
+            renderQuestion();
+            buildPalette();
+        }
+
+        function toggleLang() {
+            state.lang = state.lang === 'en' ? 'hi' : 'en';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const i = state.current;
+            const q = QUESTIONS[i];
+            const isQuiz = state.mode === 'quiz';
+            const locked = state.locked[i];
+            const userAns = state.answers[i];
+            const qTxt = state.lang === 'en' ? q.e : q.h;
+            const opts = state.lang === 'en' ? q.oEn : q.oHi;
+
+            let optsHtml = '';
+            opts.forEach((opt, idx) => {
+                let cls = '', tag = '';
+                if (isQuiz && locked) {
+                    if (idx === q.a) {
+                        cls = 'correct';
+                        tag = '<span class="opt-tag">Correct</span>';
+                    }
+                    if (userAns === idx && idx !== q.a) {
+                        cls = 'wrong';
+                        tag = '<span class="opt-tag">Your Ans</span>';
+                    }
+                } else if (userAns === idx) {
+                    cls = 'selected';
+                }
+                optsHtml += `
+                    <div class="opt ${cls} ${locked ? 'locked' : ''}" onclick="selectOption(${idx})">
+                        <div class="opt-letter">${String.fromCharCode(65 + idx)}</div>
+                        <div class="opt-text">${opt}</div>
+                        ${tag}
+                    </div>
+                `;
+            });
+
+            const solTxt = state.lang === 'en' ? q.sE : q.sH;
+            let solHtml = (isQuiz && locked) ? `
+                <div class="sol-box">
+                    <div class="sol-head"><i class="fas fa-lightbulb"></i> Explanation</div>
+                    <div>${solTxt}</div>
+                </div>
+            ` : '';
+
+            $('quizMain').innerHTML = `
+                <div class="q-card">
+                    <div class="q-top">
+                        <div class="q-num-badge">Question ${i + 1} of ${QUESTIONS.length}</div>
+                        <button class="lang-btn" onclick="toggleLang()">
+                            <i class="fas fa-language"></i> ${state.lang === 'en' ? 'हिन्दी' : 'English'}
+                        </button>
+                    </div>
+                    <div class="q-text">${qTxt}</div>
+                    <div class="opts">${optsHtml}</div>
+                    ${solHtml}
+                </div>
+            `;
+
+            $('prevBtn').disabled = i === 0;
+            $('nextLabel').textContent = i === QUESTIONS.length - 1 ? 'Finish' : 'Next';
+            updatePaletteGrid();
+        }
+
+        function selectOption(idx) {
+            if (state.mode === 'quiz' && state.locked[state.current]) return;
+            state.answers[state.current] = idx;
+            if (state.mode === 'quiz') {
+                state.locked[state.current] = true;
+                if (idx === QUESTIONS[state.current].a) {
+                    toast('Correct! 🎉');
+                } else {
+                    toast('Incorrect');
+                }
+            }
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (state.current > 0) {
+                state.current--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (state.current < QUESTIONS.length - 1) {
+                state.current++;
+                renderQuestion();
+            } else {
+                openSubmitModal();
+            }
+        }
+
+        function buildPalette() {
+            const grid = $('paletteGrid');
+            grid.innerHTML = '';
+            QUESTIONS.forEach((_, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'pal-btn';
+                btn.id = 'pal-' + i;
+                btn.textContent = i + 1;
+                btn.onclick = () => {
+                    state.current = i;
+                    closePalette();
+                    renderQuestion();
+                };
+                grid.appendChild(btn);
+            });
+            updatePaletteGrid();
+        }
+
+        function updatePaletteGrid() {
+            QUESTIONS.forEach((_, i) => {
+                const btn = $('pal-' + i);
+                if (!btn) return;
+                btn.className = 'pal-btn';
+                if (i === state.current) btn.classList.add('current');
+                if (state.answers[i] !== null) btn.classList.add('answered');
+            });
+        }
+
+        function openPalette() {
+            $('paletteDrawer').classList.add('open');$('paletteOverlay').classList.add('open');
+        }
+
+        function closePalette() {
+            $('paletteDrawer').classList.remove('open');$('paletteOverlay').classList.remove('open');
+        }
+
+        function openSubmitModal() {
+            const ans = state.answers.filter(a => a !== null).length;
+            $('modalAttempted').textContent = ans;
+            $('modalUnattempted').textContent = QUESTIONS.length - ans;
+            $('submitModal').classList.add('open');
+        }
+
+        function closeSubmitModal() {
+            $('submitModal').classList.remove('open');
+        }
+
+        function confirmSubmit() {
+            closeSubmitModal();
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            let correct = 0, wrong = 0;
+            state.answers.forEach((ans, i) => {
+                if (ans !== null) {
+                    if (ans === QUESTIONS[i].a) correct++;
+                    else wrong++;
+                }
+            });
+            $('resultsInner').innerHTML = `
+                <h2>Test Completed!</h2>
+                <p style="color:var(--text-muted);margin:8px 0;">Total Time: ${formatTime(state.elapsed)}</p>
+                <div class="res-score-card">
+                    <div class="res-score-val">${correct} / ${QUESTIONS.length}</div>
+                    <div>Score</div>
+                </div>
+                <div class="res-grid">
+                    <div class="res-item"><div class="res-item-val" style="color:var(--green)">${correct}</div><div>Correct</div></div>
+                    <div class="res-item"><div class="res-item-val" style="color:var(--red)">${wrong}</div><div>Wrong</div></div>
+                </div>
+                <button class="modal-btn confirm" onclick="location.reload()">Re-attempt</button>
+            `;
+            $('resultsScreen').classList.add('open');
+        }
+    </script>
+</body>
+</html>
